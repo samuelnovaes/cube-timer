@@ -47,13 +47,6 @@
 	</v-app>
 </template>
 
-<style>
-	* {
-		user-select: none;
-	}
-</style>
-
-
 <script>
 import Cube from './components/cube.vue'
 import moment from 'moment'
