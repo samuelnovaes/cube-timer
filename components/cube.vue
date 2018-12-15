@@ -37,6 +37,8 @@
 <style>
 	.cube {
 		width: 100%;
+		max-width: 300px;
+		border-spacing: 0;
 	}
 	.face table {
 		width: 100%;
