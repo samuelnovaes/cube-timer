@@ -1,19 +1,12 @@
 <template>
-	<v-app>
+	<v-app v-resize="onResize">
 		<v-content>
 			<v-container grid-list-xl fluid>
 				<v-layout row wrap>
 					<v-flex xs12 sm6 lg4 offset-lg2>
 						<v-layout row wrap>
 							<v-flex xs12>
-								<v-card
-									:color="color"
-									class="elevation-5 timer-card"
-									:class="{'darken-4': color}"
-									dark
-									@touchstart="onPress"
-									@touchend="onRelease"
-								>
+								<v-card :color="color" class="elevation-5 timer-card" :class="{'darken-4': color}" dark @touchstart="onPress" @touchend="onRelease">
 									<v-toolbar :color="color || 'primary'" flat>
 										<v-toolbar-title>TIMER</v-toolbar-title>
 									</v-toolbar>
@@ -61,34 +54,26 @@
 						</v-layout>
 					</v-flex>
 					<v-flex xs12 sm6 lg4>
-						<v-layout row wrap>
-							<v-flex xs12>
-								<v-card class="elevation-5" dark>
-									<v-toolbar color="primary" flat>
-										<v-toolbar-title>TIMES</v-toolbar-title>
-										<v-spacer></v-spacer>
-										<v-btn icon @click="clear">
-											<v-icon>clear_all</v-icon>
-										</v-btn>
-									</v-toolbar>
-									<v-data-table
-										:items="times"
-										hide-headers
-										:hide-actions="!times.length"
-										:loading="loading"
-										:rows-per-page-items="[16]"
-									>
-										<v-progress-linear slot="progress" color="primary" flat indeterminate></v-progress-linear>
-										<template slot="items" slot-scope="props">
-											<td>{{props.item.duration | format}}</td>
-											<td class="text-xs-right">
-												<v-icon @click="remove(props.item.id)">delete</v-icon>
-											</td>
-										</template>
-									</v-data-table>
-								</v-card>
-							</v-flex>
-						</v-layout>
+						<v-card class="elevation-5" dark>
+							<v-toolbar color="primary" flat>
+								<v-toolbar-title>TIMES</v-toolbar-title>
+								<v-spacer></v-spacer>
+								<v-btn icon @click="clear">
+									<v-icon>clear_all</v-icon>
+								</v-btn>
+							</v-toolbar>
+							<v-data-table :items="times" hide-headers :hide-actions="!times.length" :loading="loading" :rows-per-page-items="[10]">
+								<v-progress-linear slot="progress" color="primary" flat indeterminate></v-progress-linear>
+								<template slot="items" slot-scope="props">
+									<td>{{props.item.duration | format}}</td>
+									<td class="text-xs-right">
+										<v-icon @click="remove(props.item.id)">delete</v-icon>
+									</td>
+								</template>
+							</v-data-table>
+							<v-divider></v-divider>
+							<div ref="chart" class="chart"></div>
+						</v-card>
 					</v-flex>
 				</v-layout>
 			</v-container>
@@ -100,14 +85,19 @@
 	.timer-card {
 		user-select: none;
 	}
+	.chart {
+		width: 100%;
+		height: 280px;
+	}
 </style>
-
 
 <script>
 import Cube from './components/cube.vue'
 import moment from 'moment'
 import durationFormatSetup from 'moment-duration-format'
 import Dexie from 'dexie'
+import echarts from 'echarts'
+
 durationFormatSetup(moment)
 
 const db = new Dexie('cube-timer')
@@ -129,7 +119,8 @@ export default {
 			waitingTimer: null,
 			scrambleReady: false,
 			canStart: true,
-			times: []
+			times: [],
+			chart: null
 		}
 	},
 	mounted() {
@@ -137,6 +128,26 @@ export default {
 		window.onkeydown = this.onPress
 		this.scramble()
 		this.loading = true
+		this.chart = echarts.init(this.$refs.chart)
+		this.chart.setOption({
+			xAxis: {
+				type: 'category',
+				inverse: true,
+				show: false
+			},
+			yAxis: {
+				show: false
+			},
+			tooltip: {
+				trigger: 'axis',
+				formatter: params => {
+					return this.$options.filters.format(params[0].value)
+				},
+				axisPointer: {
+					type: 'none'
+				}
+			}
+		})
 		this.refresh()
 	},
 	components: {
@@ -167,10 +178,25 @@ export default {
 			this.ready = false
 			this.waiting = false
 		},
+		onResize(){
+			if(this.chart) this.chart.resize()
+		},
 		refresh() {
 			db.times.orderBy('id').reverse().toArray().then(arr => {
 				this.loading = false
 				this.times = arr
+				this.chart.setOption({
+					xAxis: {
+						data: arr.map((time, i) => i)
+					},
+					series: [{
+						type: 'line',
+						data: arr.map(time => time.duration),
+						lineStyle: {
+							color: '#fff'
+						}
+					}]
+				})
 			})
 		},
 		remove(id) {
@@ -245,4 +271,3 @@ export default {
 	}
 }
 </script>
- 

@@ -12,6 +12,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"dexie": "^2.0.4",
+		"echarts": "^4.2.0-rc.2",
 		"moment": "^2.23.0",
 		"moment-duration-format": "^2.2.2",
 		"parcel-bundler": "^1.10.3",
