@@ -72,7 +72,7 @@
 								</template>
 							</v-data-table>
 							<v-divider></v-divider>
-							<div ref="chart" class="chart"></div>
+							<div ref="chart" class="chart" v-show="this.times.length"></div>
 						</v-card>
 					</v-flex>
 				</v-layout>
@@ -142,11 +142,11 @@ export default {
 				trigger: 'axis',
 				formatter: params => {
 					return this.$options.filters.format(params[0].value)
-				},
-				axisPointer: {
-					type: 'none'
 				}
 			}
+		})
+		this.chart.on('finished', () => {
+			this.chart.resize()
 		})
 		this.refresh()
 	},
@@ -190,9 +190,10 @@ export default {
 						data: arr.map((time, i) => i)
 					},
 					series: [{
-						type: 'line',
+						type: 'bar',
 						data: arr.map(time => time.duration),
-						lineStyle: {
+						animation: false,
+						itemStyle: {
 							color: '#fff'
 						}
 					}]
