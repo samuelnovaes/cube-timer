@@ -9,7 +9,7 @@
 	},
 	"keywords": [],
 	"author": "",
-	"license": "ISC",
+	"license": "BSD 3-Clause",
 	"dependencies": {
 		"dexie": "^2.0.4",
 		"echarts": "^4.2.0-rc.2",
