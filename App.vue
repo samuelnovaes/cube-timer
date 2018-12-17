@@ -6,7 +6,15 @@
 					<v-flex xs12 sm6 lg4 offset-lg2>
 						<v-layout row wrap>
 							<v-flex xs12>
-								<v-card :color="color" class="elevation-5 timer-card" :class="{'darken-4': color}" dark @touchstart="onPress" @touchend="onRelease">
+								<v-card
+									:color="color"
+									class="elevation-5 timer-card"
+									:class="{'darken-4': color}"
+									dark
+									@touchstart="onPress"
+									@touchend="onRelease"
+									@contextmenu="onContextMenu"
+								>
 									<v-toolbar :color="color || 'primary'" flat>
 										<v-toolbar-title>TIMER</v-toolbar-title>
 									</v-toolbar>
@@ -62,7 +70,13 @@
 									<v-icon>clear_all</v-icon>
 								</v-btn>
 							</v-toolbar>
-							<v-data-table :items="times" hide-headers :hide-actions="!times.length" :loading="loading" :rows-per-page-items="[10]">
+							<v-data-table
+								:items="times"
+								hide-headers
+								:hide-actions="!times.length"
+								:loading="loading"
+								:rows-per-page-items="[10]"
+							>
 								<v-progress-linear slot="progress" color="primary" flat indeterminate></v-progress-linear>
 								<template slot="items" slot-scope="props">
 									<td>{{props.item.duration | format}}</td>
@@ -154,8 +168,11 @@ export default {
 		cube: Cube,
 	},
 	methods: {
+		onContextMenu(e) {
+			e.preventDefault()
+		},
 		onPress(e) {
-			if (!this.waiting && !this.running && this.canStart && e.keyCode == 32) {
+			if (!this.waiting && !this.running && this.canStart && (e.keyCode == 32 || e.type == 'touchstart')) {
 				this.time = 0
 				this.waiting = true
 				this.scrambleReady = true
@@ -178,8 +195,8 @@ export default {
 			this.ready = false
 			this.waiting = false
 		},
-		onResize(){
-			if(this.chart) this.chart.resize()
+		onResize() {
+			if (this.chart) this.chart.resize()
 		},
 		refresh() {
 			db.times.orderBy('id').reverse().toArray().then(arr => {
