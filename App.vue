@@ -180,10 +180,10 @@ export default {
 					this.ready = true
 				}, 1000)
 			}
-			if (e.keyCode == 32) e.preventDefault()
+			if (e.keyCode == 32 || e.type == 'touchstart') e.preventDefault()
 			this.stop()
 		},
-		onRelease() {
+		onRelease(e) {
 			if (this.ready) {
 				this.start()
 			}
@@ -194,6 +194,7 @@ export default {
 			}
 			this.ready = false
 			this.waiting = false
+			if (e.type == 'touchstart') e.preventDefault()
 		},
 		onResize() {
 			if (this.chart) this.chart.resize()
